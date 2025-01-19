@@ -1,0 +1,16 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "mega project's backend",
+  "keywords": [
+    "javasxript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "waasim ansari",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
