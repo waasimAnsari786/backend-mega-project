@@ -1,9 +1,23 @@
+//first appraoch to connect database
+import app from "./app.js";
 import connectDB from "./db/index.js";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "./.env" });
 
-connectDB();
+const port = process.env.PORT || 8000;
+
+connectDB()
+  .then(() => {
+    //app listned if database will have connected succesfully
+    app.listen(port, () => {
+      console.log(`App is listening on port ${port}`);
+    });
+  })
+  //   caught error if database won't have connected
+  .catch((err) => console.error("Database caonnection failed error: ", err));
+
+//second appraoch to connect database
 
 /*
 import mongoose from "mongoose";
