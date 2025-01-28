@@ -7,10 +7,6 @@ import ApiResponse from "../utils/ApiResponse.js";
 const registerUser = asyncHandler(async (req, res) => {
   // destructure email, password and name
   const { userName, email, fullName, password } = req.body;
-  console.log("email:", email);
-  console.log("password:", password);
-
-  console.log("Data of req.body: ", req.body);
 
   // validation for checking are all fields realted to user's name,email,password present?
   if (
@@ -21,7 +17,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // variable for getting is current user already register in my DB?
-  const existedUser = User.findOne({ $or: [{ userName }, { email }] });
+  const existedUser = await User.findOne({ $or: [{ userName }, { email }] });
   console.log("existedUser in mongoDB:", existedUser);
 
   // throw error if user already exists
@@ -43,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // var for getting avatar's cloudinary path
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   // var for getting cover image's cloudinary path
-  const coverImage = await uploadOnCloudinary(avatarLocalPath);
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
   console.log("avatar file data returned by cloudinary:", avatar);
 
   // if (!avatar) {
