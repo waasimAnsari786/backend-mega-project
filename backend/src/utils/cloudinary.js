@@ -18,11 +18,9 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 
     const uploadResult = await cloudinary.uploader.upload(localFilePath, {
-      public_id: "shoes", // Customize public_id as needed
       resource_type: "auto",
     });
 
-    console.log("File uploaded successfully:", uploadResult);
     return uploadResult;
   } catch (error) {
     console.error("Error uploading file to Cloudinary:", error.message);
@@ -31,7 +29,6 @@ const uploadOnCloudinary = async (localFilePath) => {
     // Remove the file from the local system after upload attempt
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
-      console.log("Local file deleted:", localFilePath);
     }
   }
 };

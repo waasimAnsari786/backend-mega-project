@@ -18,7 +18,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // variable for getting is current user already register in my DB?
   const existedUser = await User.findOne({ $or: [{ userName }, { email }] });
-  console.log("existedUser in mongoDB:", existedUser);
 
   // throw error if user already exists
   if (existedUser) {
@@ -28,8 +27,14 @@ const registerUser = asyncHandler(async (req, res) => {
   // var for getting avatar's local path
   const avatarLocalPath = req.files?.avatar[0]?.path;
   // var for getting cover image's local path
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
-  console.log("data returned by multer:", req.files);
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
 
   // throw error if avatar isn't passed by user becuse it's required in my DB
   if (!avatarLocalPath) {
@@ -39,31 +44,23 @@ const registerUser = asyncHandler(async (req, res) => {
   // var for getting avatar's cloudinary path
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   // var for getting cover image's cloudinary path
-  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-  console.log("avatar file data returned by cloudinary:", avatar);
-
-  // if (!avatar) {
-  //   throw new ApiError(400, "Avatar file is required");
-  // }
+  const coverImage = coverImageLocalPath
+    ? await uploadOnCloudinary(coverImageLocalPath)
+    : null;
 
   // creeating user object for entering user into DB
   const user = await User.create({
     fullName,
-    avatar: avatar.url,
-    coverImage: coverImage?.url || "",
+    avatar: avatar.secure_url,
+    coverImage: coverImage?.secure_url || "",
     email,
     password,
     userName: userName.toLowerCase(),
   });
-  console.log("created user in mogodb:", user);
 
   // again find user by the document id (given by DB) for removing password and refresh token from final data for sending it as a response
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
-  );
-  console.log(
-    "created user after removing passoword and refresh token:",
-    createdUser
   );
 
   // throw error if user won't create
