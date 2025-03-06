@@ -42,7 +42,6 @@ const userSchema = new Schema(
       type: String,
       required: [true, "password is required"],
       trim: true,
-      index: true,
     },
     refreshToken: {
       type: String,
@@ -84,7 +83,7 @@ userSchema.methods.generateRefreshTokenSecret = function () {
   );
 };
 
-userSchema.methods.isPasswordCorrect = async function name(password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 

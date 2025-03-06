@@ -14,7 +14,7 @@ connectDB()
       console.log(`App is listening on port ${port}`);
     });
   })
-  //   caught error if database won't have connected
+  //caught error if database won't have connected
   .catch((err) => console.error("Database caonnection failed error: ", err));
 
 //second appraoch to connect database
@@ -29,7 +29,6 @@ const app = express();
   try {
     await mongoose.connect(`${process.env.MONGODB_URL}/${DB_NAME}`);
     app.on("error", error => {
-      console.error("Database connecting error: ", error);
       throw error;
     });
 
@@ -37,7 +36,7 @@ const app = express();
       console.log(`App is listening on port ${process.env.PORT}`);
     });
   } catch (error) {
-    console.error(error);
+      console.error("Database connecting error: ", error);
   }
 })();
 */

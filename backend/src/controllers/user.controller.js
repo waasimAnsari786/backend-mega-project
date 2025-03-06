@@ -10,7 +10,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // destructure email, password and name
   const { userName, email, fullName, password } = req.body;
 
-  // validation for checking are all fields realted to user's name,email,password present?
+  // validation for checking are all fields related to user's name,email,password present?
   if (
     [userName, email, fullName, password].some((field) => field?.trim() === "")
   ) {
@@ -93,7 +93,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     console.error(error.message);
     throw new ApiError(
       500,
-      "Something went wrong wile generating access or refresh token"
+      "Something went wrong while generating access or refresh token"
     );
   }
 };
@@ -189,5 +189,4 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export default registerUser;
-export { loginUser, logoutUser, refreshAccessToken };
+export { loginUser, logoutUser, refreshAccessToken, registerUser };
