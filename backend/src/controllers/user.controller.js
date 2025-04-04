@@ -26,35 +26,35 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or name already exists");
   }
 
-  // var for getting avatar's local path
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  // var for getting cover image's local path
-  let coverImageLocalPath;
-  if (
-    req.files &&
-    Array.isArray(req.files.coverImage) &&
-    req.files.coverImage.length > 0
-  ) {
-    coverImageLocalPath = req.files.coverImage[0].path;
-  }
+  // // var for getting avatar's local path
+  // const avatarLocalPath = req.files?.avatar[0]?.path;
+  // // var for getting cover image's local path
+  // let coverImageLocalPath;
+  // if (
+  //   req.files &&
+  //   Array.isArray(req.files.coverImage) &&
+  //   req.files.coverImage.length > 0
+  // ) {
+  //   coverImageLocalPath = req.files.coverImage[0].path;
+  // }
 
-  // throw error if avatar isn't passed by user becuse it's required in my DB
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is required");
-  }
+  // // throw error if avatar isn't passed by user becuse it's required in my DB
+  // if (!avatarLocalPath) {
+  //   throw new ApiError(400, "Avatar file is required");
+  // }
 
-  // var for getting avatar's cloudinary path
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-  // var for getting cover image's cloudinary path
-  const coverImage = coverImageLocalPath
-    ? await uploadOnCloudinary(coverImageLocalPath)
-    : null;
+  // // var for getting avatar's cloudinary path
+  // const avatar = await uploadOnCloudinary(avatarLocalPath);
+  // // var for getting cover image's cloudinary path
+  // const coverImage = coverImageLocalPath
+  //   ? await uploadOnCloudinary(coverImageLocalPath)
+  //   : null;
 
   // creeating user object for entering user into DB
   const user = await User.create({
     fullName,
-    avatar: avatar.secure_url,
-    coverImage: coverImage?.secure_url || "",
+    avatar: "",
+    coverImage: "",
     email,
     password,
     userName: userName.toLowerCase(),
@@ -344,6 +344,41 @@ const getUserChannelDetails = asyncHandler(async (req, res) => {
         as: "subscribedTo",
       },
     },
+    // first approach for checking is current user is an owner and has he subscribed?
+    // {
+    //   $addFields: {
+    //     subscribersCount: { $size: "$subscribers" },
+    //     subscribedToChannelsCount: { $size: "$subscribedTo" },
+    //     isSubscribed: {
+    //       $cond: {
+    //         if: { $in: [req.user?._id, "$subscribers.subcriber"] },
+    //         then: true,
+    //         else: false,
+    //       },
+    //     },
+    //     isOwner: {
+    //       $cond: {
+    //         if: { $eq: [req.user._id, "$_id"] },
+    //         then: true,
+    //         else: false, // Remove the field if the user is the owner
+    //       },
+    //     },
+    //   },
+    // },
+    // {
+    //   $project: {
+    //     fullName: 1,
+    //     userName: 1,
+    //     email: 1,
+    //     avatar: 1,
+    //     coverImage: 1,
+    //     subscribersCount: 1,
+    //     subscribedToChannelsCount: 1,
+    //     isSubscribed: 1,
+    //     isOwner: 1,
+    //   },
+    // },
+    // SECOND AND RECOMMENDED APPROACH FROM ME TO CHECK THE SAME THING
     {
       $addFields: {
         subscribersCount: { $size: "$subscribers" },
@@ -353,6 +388,13 @@ const getUserChannelDetails = asyncHandler(async (req, res) => {
             if: { $in: [req.user?._id, "$subscribers.subcriber"] },
             then: true,
             else: false,
+          },
+        },
+        isOwner: {
+          $cond: {
+            if: { $eq: [req.user._id, "$_id"] },
+            then: true,
+            else: false, // Remove the field if the user is the owner
           },
         },
       },
@@ -366,7 +408,20 @@ const getUserChannelDetails = asyncHandler(async (req, res) => {
         coverImage: 1,
         subscribersCount: 1,
         subscribedToChannelsCount: 1,
-        isSubscribed: 1,
+        isSubscribed: {
+          $cond: {
+            if: "$isOwner",
+            then: "$$REMOVE", // Remove the field if the user is the owner
+            else: "$isSubscribed",
+          },
+        },
+        isOwner: {
+          $cond: {
+            if: "$isOwner",
+            then: "$isOwner",
+            else: "$$REMOVE", // Remove the field if the user is the owner
+          },
+        },
       },
     },
   ]);
